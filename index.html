@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Hi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>reskyline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600&family=Outfit:wght@200;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Hi</h1>
+
+<audio id="bg-music" src="intro.mp3" loop></audio>
+
+<div id="splash">
+  <div class="splash-name">reskyline</div>
+  <div class="splash-divider"></div>
+  <div class="splash-prompt">click to enter</div>
+</div>
+
+<canvas id="ascii-canvas"></canvas>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="grid-bg"></div>
+
+<div class="scene">
+  <div class="panel-wrap">
+    <canvas id="beam-canvas"></canvas>
+    <div class="panel" id="panel">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <img class="avatar" src="icon.jpg" alt="reskyline" />
+
+      <h1><span id="title-text"></span><span class="cursor" id="title-cursor"></span></h1>
+      <p class="subtitle">programmer</p>
+      <div class="divider"></div>
+
+      <div class="typewriter-wrap">
+        <span id="typewriter-text"></span><span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
