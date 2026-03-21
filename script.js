@@ -172,7 +172,8 @@ var panel = document.getElementById('panel');
 var music = document.getElementById('bg-music');
 
 splash.addEventListener('click', function() {
-  music.play();
+  music.load();
+  music.play().catch(function() {});
   splash.classList.add('hidden');
   setTimeout(function() {
     panel.style.transition = 'opacity 0.8s ease';
