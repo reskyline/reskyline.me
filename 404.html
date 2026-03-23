@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — reskyline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600&family=Outfit:wght@200;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #050310;
+      font-family: 'Rajdhani', sans-serif;
+      color: #f0eaff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    #trail-canvas { position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .blob-1 { width: 500px; height: 500px; background: rgba(100,40,220,0.2); top:-120px; left:-100px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(60,20,160,0.15); bottom:-80px; right:-80px; }
+
+    .grid-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(120,80,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(120,80,255,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    }
+
+    .container {
+      position: relative; z-index: 10;
+      text-align: left; max-width: 480px; width: 90%; padding: 2rem;
+    }
+
+    #boot-text {
+      font-size: 13px; letter-spacing: 0.15em;
+      color: rgba(160,110,255,0.8); line-height: 2; white-space: pre;
+      margin-bottom: 1.5rem; min-height: 13em;
+    }
+
+    .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+    .progress-bar-track { flex: 1; height: 4px; background: rgba(120,60,255,0.15); border-radius: 100px; border: 1px solid rgba(160,120,255,0.2); overflow: hidden; }
+    .progress-bar-fill { height: 100%; width: 0%; border-radius: 100px; background: linear-gradient(90deg, #ff4060, #a855f7); box-shadow: 0 0 8px rgba(255,60,100,0.6); transition: width 0.15s ease; }
+    .progress-label { font-family: 'Rajdhani', sans-serif; font-size: 12px; letter-spacing: 0.15em; color: rgba(255,100,130,0.6); min-width: 36px; text-align: right; }
+
+    .error-block { opacity: 0; transition: opacity 0.8s ease; border-left: 2px solid rgba(255,60,100,0.6); padding-left: 1.2rem; margin-bottom: 2rem; }
+    .error-block.visible { opacity: 1; }
+
+    .error-code {
+      font-size: clamp(3rem, 10vw, 5rem); font-weight: 600; letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #ff4060, #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1; margin-bottom: 0.4rem;
+      animation: glitch 3s ease-in-out infinite;
+    }
+    @keyframes glitch {
+      0%,90%,100% { transform: translate(0); filter: none; }
+      92% { transform: translate(-3px,1px); filter: hue-rotate(90deg); }
+      94% { transform: translate(3px,-1px); filter: hue-rotate(180deg); }
+      96% { transform: translate(-2px,2px); }
+      98% { transform: translate(2px,-1px); filter: none; }
+    }
+
+    .error-msg { font-family: 'Outfit', sans-serif; font-size: 14px; color: rgba(220,200,255,0.6); letter-spacing: 0.05em; }
+
+    .home-btn {
+      font-family: 'Rajdhani', sans-serif; font-size: 12px; letter-spacing: 0.2em;
+      text-transform: uppercase; padding: 10px 24px; border-radius: 8px;
+      background: rgba(100,60,180,0.2); border: 1px solid rgba(160,120,255,0.3);
+      color: rgba(200,170,255,0.8); cursor: pointer; text-decoration: none;
+      display: inline-block; opacity: 0;
+      transition: opacity 0.8s ease, background 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .home-btn.visible { opacity: 1; }
+    .home-btn:hover { background: rgba(130,70,220,0.35); border-color: rgba(180,130,255,0.6); color: #fff; box-shadow: 0 0 16px rgba(140,70,255,0.3); }
+  </style>
+</head>
+<body>
+
+<canvas id="rain-canvas"></canvas>
+<canvas id="trail-canvas"></canvas>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="grid-bg"></div>
+
+<div class="container">
+  <div id="boot-text"></div>
+  <div class="progress-wrap">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label">0%</div>
+  </div>
+  <div class="error-block" id="error-block">
+    <div class="error-code">404</div>
+    <div class="error-msg">signal lost. this page does not exist.</div>
+  </div>
+  <a href="/" class="home-btn" id="home-btn">return to base</a>
+</div>
+
+<script>
+  var bootLines = [
+    { text: '> scanning requested path...', progress: 15 },
+    { text: '> resolving route...', progress: 30 },
+    { text: '> cross-referencing index...', progress: 50 },
+    { text: '> WARNING: resource not found', progress: 65 },
+    { text: '> attempting recovery...', progress: 80 },
+    { text: '> recovery failed.', progress: 92 },
+    { text: '> connection terminated.', progress: 100 },
+  ];
+
+  var bootEl = document.getElementById('boot-text');
+  var progressFill = document.getElementById('progress-fill');
+  var progressLabel = document.getElementById('progress-label');
+  var errorBlock = document.getElementById('error-block');
+  var homeBtn = document.getElementById('home-btn');
+
+  function setProgress(pct, isError) {
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = pct + '%';
+  }
+
+  function runBoot() {
+    var lineIndex = 0, text = '';
+    function nextLine() {
+      if (lineIndex >= bootLines.length) {
+        setTimeout(function() {
+          errorBlock.classList.add('visible');
+          setTimeout(function() { homeBtn.classList.add('visible'); }, 400);
+        }, 300);
+        return;
+      }
+      var item = bootLines[lineIndex];
+      var line = item.text;
+      var charI = 0;
+      function typeChar() {
+        if (charI <= line.length) {
+          bootEl.textContent = text + line.substring(0, charI) + (charI < line.length ? '_' : '');
+          charI++;
+          var speed = line.includes('WARNING') ? 18 : 28;
+          setTimeout(typeChar, speed);
+        } else {
+          text += line + '\n';
+          bootEl.textContent = text;
+          setProgress(item.progress);
+          lineIndex++;
+          var pause = line.includes('WARNING') ? 300 : 120;
+          setTimeout(nextLine, pause);
+        }
+      }
+      typeChar();
+    }
+    nextLine();
+  }
+  runBoot();
+
+  // rain
+  var rainCanvas = document.getElementById('rain-canvas');
+  var rctx = rainCanvas.getContext('2d');
+  var chars = '@#$%&?!*+~=^<>[]{}|/\\'.split('');
+  var rainDrops = [], rainCharSize = 14;
+  var rainColors = ['rgba(160,80,255,','rgba(120,80,255,','rgba(80,100,255,','rgba(60,130,255,','rgba(100,60,255,'];
+
+  function resizeRain() {
+    rainCanvas.width = window.innerWidth; rainCanvas.height = window.innerHeight;
+    rainDrops = [];
+    var cols = Math.floor(rainCanvas.width / rainCharSize);
+    for (var i = 0; i < cols; i++) {
+      var drop = { y: Math.random()*-rainCanvas.height, speed: Math.random()*2+1, length: Math.floor(Math.random()*15+8), color: rainColors[Math.floor(Math.random()*rainColors.length)], chars: [], opacity: Math.random()*0.4+0.1 };
+      for (var j = 0; j < 20; j++) drop.chars.push(chars[Math.floor(Math.random()*chars.length)]);
+      rainDrops.push(drop);
+    }
+  }
+  resizeRain();
+  window.addEventListener('resize', resizeRain);
+
+  function animateRain() {
+    rctx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+    rctx.font = rainCharSize + 'px monospace';
+    for (var i = 0; i < rainDrops.length; i++) {
+      var drop = rainDrops[i], x = i * rainCharSize;
+      for (var j = 0; j < drop.length; j++) {
+        var y = drop.y - j * rainCharSize;
+        if (y < 0 || y > rainCanvas.height) continue;
+        var fade = (1 - j/drop.length) * drop.opacity;
+        if (j === 0) fade = drop.opacity * 1.5;
+        rctx.fillStyle = drop.color + Math.min(fade, 0.9) + ')';
+        rctx.fillText(drop.chars[j % drop.chars.length], x, y);
+      }
+      drop.y += drop.speed;
+      if (Math.random() > 0.95) drop.chars[Math.floor(Math.random()*drop.chars.length)] = chars[Math.floor(Math.random()*chars.length)];
+      if (drop.y - drop.length*rainCharSize > rainCanvas.height) { drop.y = Math.random()*-200; drop.speed = Math.random()*2+1; drop.length = Math.floor(Math.random()*15+8); drop.color = rainColors[Math.floor(Math.random()*rainColors.length)]; drop.opacity = Math.random()*0.4+0.1; }
+    }
+    requestAnimationFrame(animateRain);
+  }
+  animateRain();
+
+  // trail
+  var trailCanvas = document.getElementById('trail-canvas');
+  var tctx = trailCanvas.getContext('2d');
+  var trailPoints = [];
+  function resizeTrail() { trailCanvas.width = window.innerWidth; trailCanvas.height = window.innerHeight; }
+  resizeTrail();
+  window.addEventListener('resize', resizeTrail);
+  window.addEventListener('mousemove', function(e) {
+    trailPoints.push({ x: e.clientX, y: e.clientY, life: 1.0 });
+    if (trailPoints.length > 60) trailPoints.shift();
+  });
+  function animateTrail() {
+    tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+    for (var i = 0; i < trailPoints.length; i++) {
+      var p = trailPoints[i]; p.life -= 0.025;
+      if (p.life <= 0) continue;
+      var t = i / trailPoints.length;
+      tctx.beginPath();
+      tctx.arc(p.x, p.y, t*6+1, 0, Math.PI*2);
+      tctx.fillStyle = 'rgba('+(Math.round(160-t*100))+','+(Math.round(60+t*60))+',255,'+(p.life*t*0.8)+')';
+      tctx.fill();
+    }
+    trailPoints = trailPoints.filter(function(p) { return p.life > 0; });
+    requestAnimationFrame(animateTrail);
+  }
+  animateTrail();
+</script>
+</body>
+</html>
