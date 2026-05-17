@@ -13,7 +13,6 @@ var bootEl = document.getElementById('boot-text');
 var bootDiv = document.getElementById('boot');
 var progressFill = document.getElementById('progress-fill');
 var progressLabel = document.getElementById('progress-label');
-var splash = document.getElementById('splash');
 
 function setProgress(pct) {
   progressFill.style.width = pct + '%';
@@ -28,8 +27,17 @@ function runBoot() {
     if (lineIndex >= bootLines.length) {
       setTimeout(function() {
         bootDiv.classList.add('hidden');
-        setTimeout(function() { bootDiv.style.display = 'none'; }, 600);
-      }, 500);
+        setTimeout(function() {
+          bootDiv.style.display = 'none';
+          var panel = document.getElementById('panel');
+          panel.style.transition = 'opacity 0.8s ease';
+          panel.style.opacity = '1';
+          setTimeout(function() {
+            setupBeam(); animateBeam();
+            typeTitle(function() { type(); });
+          }, 800);
+        }, 600);
+      }, 200);
       return;
     }
     var item = bootLines[lineIndex];
@@ -41,13 +49,13 @@ function runBoot() {
       if (charI <= line.length) {
         bootEl.textContent = text + line.substring(0, charI) + (charI < line.length ? '_' : '');
         charI++;
-        setTimeout(typeChar, 28);
+        setTimeout(typeChar, 10);
       } else {
         text += line + '\n';
         bootEl.textContent = text;
         setProgress(targetProgress);
         lineIndex++;
-        setTimeout(nextLine, 130);
+        setTimeout(nextLine, 50);
       }
     }
     typeChar();
@@ -278,32 +286,60 @@ updateClock();
 setInterval(updateClock,1000);
 
 // ── FLIP ─────────────────────────────────────────────────────────
-var flipper=document.getElementById('card-flipper');
-var projectsBtn=document.getElementById('projects-btn');
-var backBtn=document.getElementById('back-btn');
+var flipper    = document.getElementById('card-flipper');
+var aboutBtn   = document.getElementById('about-btn');
+var projectsBtn = document.getElementById('projects-btn');
+var backBtn    = document.getElementById('back-btn');
+var backProjects = document.getElementById('back-projects');
+var backAbout    = document.getElementById('back-about');
 
-projectsBtn.addEventListener('click', function() {
-  isFlipped=true; beamCanvas.style.opacity='0'; flipper.classList.add('flipped');
-  setTimeout(function(){beamCanvas.style.opacity='1';},850);
-});
+function flipTo(section) {
+  isFlipped = true;
+  beamCanvas.style.opacity = '0';
+
+  // swap content before the flip completes
+  if (section === 'about') {
+    backProjects.classList.add('hidden');
+    backAbout.classList.remove('hidden');
+    aboutBtn.classList.add('active');
+    projectsBtn.classList.remove('active');
+  } else {
+    backAbout.classList.add('hidden');
+    backProjects.classList.remove('hidden');
+    projectsBtn.classList.add('active');
+    aboutBtn.classList.remove('active');
+  }
+
+  flipper.classList.add('flipped');
+  setTimeout(function() { beamCanvas.style.opacity = '1'; }, 850);
+}
+
+aboutBtn.addEventListener('click', function() { flipTo('about'); });
+projectsBtn.addEventListener('click', function() { flipTo('projects'); });
+
 backBtn.addEventListener('click', function() {
-  isFlipped=false; beamCanvas.style.opacity='0'; flipper.classList.remove('flipped');
-  setTimeout(function(){beamCanvas.style.opacity='1';},850);
+  isFlipped = false;
+  beamCanvas.style.opacity = '0';
+  flipper.classList.remove('flipped');
+  aboutBtn.classList.remove('active');
+  projectsBtn.classList.remove('active');
+  setTimeout(function() { beamCanvas.style.opacity = '1'; }, 850);
 });
 
-// ── SPLASH ────────────────────────────────────────────────────────
-var panel=document.getElementById('panel');
-var music=document.getElementById('bg-music');
+// ── DISCORD COPY TOAST ────────────────────────────────────────────
+var toast = document.getElementById('toast');
+var toastTimer;
 
-splash.addEventListener('click', function() {
-  music.load(); music.play().catch(function(){});
-  splash.classList.add('hidden');
-  setTimeout(function() {
-    panel.style.transition='opacity 0.8s ease';
-    panel.style.opacity='1';
-    setTimeout(function() {
-      setupBeam(); animateBeam();
-      typeTitle(function(){type();});
-    },800);
-  },400);
+function showToast() {
+  clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(function() {
+    toast.classList.remove('show');
+  }, 2200);
+}
+
+var discordBtn = document.getElementById('discord-btn');
+discordBtn.addEventListener('click', function(e) {
+  e.preventDefault();
+  navigator.clipboard.writeText('reskylines').then(showToast).catch(showToast);
 });
