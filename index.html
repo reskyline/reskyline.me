@@ -10,8 +10,6 @@
 </head>
 <body>
 
-<audio id="bg-music" src="intro.mp3" loop preload="auto"></audio>
-
 <!-- BOOT SEQUENCE -->
 <div id="boot">
   <div id="boot-inner">
@@ -25,18 +23,17 @@
   </div>
 </div>
 
-<div id="splash">
-  <div class="splash-name">reskyline</div>
-  <div class="splash-divider"></div>
-  <div class="splash-prompt">click to enter</div>
-</div>
-
 <canvas id="ascii-canvas"></canvas>
 <canvas id="rain-canvas"></canvas>
 <canvas id="trail-canvas"></canvas>
 <div class="blob blob-1"></div>
 <div class="blob blob-2"></div>
-<div class="grid-bg"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas fa-check toast-icon"></i>
+  <span class="toast-msg"><span>reskylines</span> copied to clipboard</span>
+</div>
 
 <div class="scene">
   <div class="panel-wrap" id="panel-wrap">
@@ -44,6 +41,7 @@
 
     <div class="card-flipper" id="card-flipper">
 
+      <!-- FRONT -->
       <div class="card-face card-front" id="panel">
         <div class="corner corner-tl"></div>
         <div class="corner corner-tr"></div>
@@ -61,19 +59,25 @@
         </div>
 
         <div class="social-icons">
-          <a href="https://discord.com/users/338755757715619840" target="_blank" class="glass-icon">
+          <a href="#" class="glass-icon" id="discord-btn" title="Copy Discord username">
             <i class="fab fa-discord"></i>
           </a>
-          <a href="https://github.com/reskyline" target="_blank" class="glass-icon">
+          <a href="https://github.com/4ut" target="_blank" class="glass-icon">
             <i class="fab fa-github"></i>
           </a>
         </div>
 
-        <button class="projects-btn" id="projects-btn">
-          <i class="fas fa-code"></i> projects
-        </button>
+        <div class="front-btns">
+          <button class="flip-btn" id="about-btn">
+            <i class="fas fa-user"></i> about
+          </button>
+          <button class="flip-btn" id="projects-btn">
+            <i class="fas fa-code"></i> projects
+          </button>
+        </div>
       </div>
 
+      <!-- BACK -->
       <div class="card-face card-back">
         <div class="corner corner-tl"></div>
         <div class="corner corner-tr"></div>
@@ -84,18 +88,28 @@
           <i class="fas fa-arrow-left"></i> back
         </button>
 
-        <h2 class="projects-title">projects</h2>
-        <div class="divider" style="margin-bottom:1.2rem;"></div>
-
-        <div class="project-list">
-          <a class="project-card" href="https://www.roblox.com/communities/422808508/skyline-interactive-network#!/about" target="_blank">
-            <div class="project-name">group <i class="fas fa-arrow-up-right-from-square" style="font-size:10px;opacity:0.6;"></i></div>
-            <div class="project-desc">my roblox group for games</div>
-            <div class="project-tags">
-              <span class="project-tag">ROBLOX</span>
-            </div>
-          </a>
+        <!-- PROJECTS PANEL -->
+        <div id="back-projects">
+          <h2 class="back-title">projects</h2>
+          <div class="divider" style="margin-bottom:1.2rem;"></div>
+          <div class="project-list">
+            <a class="project-card" href="https://github.com/4ut" target="_blank">
+              <div class="project-name">vast <i class="fas fa-arrow-up-right-from-square" style="font-size:10px;opacity:0.6;"></i></div>
+              <div class="project-desc">WIP</div>
+              <div class="project-tags">
+                <span class="project-tag">Python</span>
+              </div>
+            </a>
+          </div>
         </div>
+
+        <!-- ABOUT PANEL -->
+        <div id="back-about" class="hidden">
+          <h2 class="back-title">about</h2>
+          <div class="divider" style="margin-bottom:1.2rem;"></div>
+          <p class="about-bio">hi i like to code!</p>
+        </div>
+
       </div>
 
     </div>
